@@ -7,7 +7,7 @@ async def handle_client(reader, writer):
     """Recebe mensagens criptografadas e decifra-as"""
     print("Cliente conectado!")
     try:
-        while True
+        while True:
             data = await reader.read(1024)
             if not data:
                 print("Cliente desconectado.")

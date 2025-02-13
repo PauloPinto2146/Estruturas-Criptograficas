@@ -11,7 +11,7 @@ def shake_256_xof(key: bytes):
 
 def encrypt_message(key: bytes, message: str):
     """Cifra a mensagem usando SHAKE-256 e um nonce"""
-    nonce = os.urandom(16)  # Gera um nonce aleatório
+    nonce = derive_nonce(key)  # Deriva um nonce determinístico
     shake_key = shake_256_xof(key)  # Chave criada pelo SHAKE-256
 
     cifra = Cipher(algorithms.AES(shake_key), modes.GCM(nonce), backend=default_backend())
@@ -28,3 +28,9 @@ def decrypt_message(key: bytes, nonce: bytes, cifratext: bytes, tag: bytes):
     cifra = Cipher(algorithms.AES(shake_key), modes.GCM(nonce, tag), backend=default_backend())
     decryptor = cifra.decryptor()
     return decryptor.update(cifratext) + decryptor.finalize()
+
+def derive_nonce(key: bytes):
+    """Deriva um nonce determinístico a partir da chave usando SHAKE-256"""
+    digest = hashes.Hash(hashes.SHAKE256(16), backend=default_backend())  
+    digest.update(key)  
+    return digest.finalize()

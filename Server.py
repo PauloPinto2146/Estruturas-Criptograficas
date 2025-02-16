@@ -4,19 +4,19 @@ from crypto_utils import hkdf_sha256, sponge_aead_decrypt, block_size
 class Server:
     def __init__(self):
         self.clients = {}
-        self.counter = 1
+        self.clientCounter = 1
         self.server_key = input("Chave do servidor: ")
 
     async def handle_client(self, reader, writer):
-        client_id = self.counter
-        self.counter += 1
+        client_id = self.clientCounter
+        self.clientCounter += 1
 
         # Envia o client_id para o cliente
         writer.write(f"{client_id}\n".encode())
         await writer.drain()
 
         # Gera o salt para o cliente
-        salt = b"salt_client_id" + str(client_id).encode()
+        salt = b"salt_clientid_" + str(client_id).encode() + b"_messageid_" + str(0).encode()
         writer.write(salt + b"\n")  # Envia o salt para o cliente
         await writer.drain()
 
@@ -27,6 +27,7 @@ class Server:
             "writer": writer,
             "cypher_key": derived_bytes[:32], # 32 bytes para a chave -> 256 bits
             "nonce": derived_bytes[32:], # 12 bytes para o nonce -> 96 bits
+            "messageCounter": 0
         }
 
         print(f"Cliente {client_id} conectado!")
@@ -52,6 +53,21 @@ class Server:
                 decrypted_message  = sponge_aead_decrypt(self.clients[int(client_id)]['cypher_key'], self.clients[int(client_id)]['nonce'], chipher_message, tag)
                 print(f"Mensagem decifrada: {decrypted_message.decode()}")
                 print("######## FIM DE MENSAGEM ########")
+                
+                
+                self.clients[int(client_id)]['messageCounter'] += 1
+                # Gera o salt para o cliente
+                salt = b"salt_clientid_" + str(client_id).encode() + b"_messageid_" + str(self.clients[int(client_id)]['messageCounter']).encode()
+                writer.write(salt + b"\n")  # Envia o salt para o cliente
+                await writer.drain()
+                derived_bytes = hkdf_sha256(salt, self.server_key)
+                self.clients[int(client_id)] = {
+                    "writer": writer,
+                    "cypher_key": derived_bytes[:32], # 32 bytes para a chave -> 256 bits
+                    "nonce": derived_bytes[32:], # 12 bytes para o nonce -> 96 bits
+                    "messageCounter": self.clients[int(client_id)]['messageCounter']
+                }
+
         except Exception as e:
             print(f"Erro no cliente {client_id}: {e}")
         finally:

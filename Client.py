@@ -46,13 +46,22 @@ class Client:
                 writer.write(packet)
                 await writer.drain()
                 print("Mensagem enviada!")
+
+                salt = await reader.readline()
+                salt = salt.strip()  # Remove o '\n'
+                print(f"Salt recebido: {salt.decode()}")
+                derived_bytes = hkdf_sha256(salt, self.client_key)
+                self.cypher_key = derived_bytes[:32] # 32 bytes para a chave -> 256 bits
+                self.client_nonce = derived_bytes[32:] # 12 bytes para o nonce -> 96 bits
+                print(f"Chave da cifra: {self.cypher_key.hex()}")
+                print(f"Nonce do cliente: {self.client_nonce.hex()}")
         except Exception as e:
             print(f"Erro no cliente: {e}")
         finally:
             print("Sair...")
             writer.close()
             await writer.wait_closed()
-
+    
     def run(self):
         asyncio.run(self.start_client())
 

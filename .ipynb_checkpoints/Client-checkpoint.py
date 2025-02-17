@@ -8,7 +8,7 @@ class Client:
         self.client_nonce = None
 
     async def start_client(self):
-        reader, writer = await asyncio.open_connection('127.0.0.1', 8888)
+        reader, writer = await asyncio.open_connection('127.0.0.1', 9000)
 
         # Recebe o client_id
         client_id = await reader.readline()

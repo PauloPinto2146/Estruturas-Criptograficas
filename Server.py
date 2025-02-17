@@ -77,7 +77,7 @@ class Server:
             print(f"Cliente {client_id} saiu.")
 
     async def start_server(self):
-        server = await asyncio.start_server(self.handle_client, '127.0.0.1', 8888)
+        server = await asyncio.start_server(self.handle_client, '127.0.0.1', 9000)
         async with server:
             await server.serve_forever()
 

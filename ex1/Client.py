@@ -60,11 +60,8 @@ class Client:
         finally:
             print("Sair...")
             writer.close()
-            await writer.wait_closed()
-    
-    def run(self):
-        asyncio.run(self.start_client())
+            await writer.wait_closed()  
 
 if __name__ == "__main__":
     client = Client()
-    client.run()
+    asyncio.run(client.start_client())

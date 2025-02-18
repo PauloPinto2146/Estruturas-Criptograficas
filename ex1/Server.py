@@ -38,8 +38,8 @@ class Server:
             while not reader.at_eof():
                 id_bytes = await reader.readexactly(4)
                 print("######## MENSAGEM RECEBIDA ########")
-                print(f"ID do cliente: {int(client_id)}")
                 client_id = id_bytes.decode().strip()
+                print(f"ID do cliente: {int(client_id)}")
                 data = await reader.read(1024)
 
                 chipher_message = data[:-block_size]
@@ -69,7 +69,7 @@ class Server:
                 }
 
         except Exception as e:
-            print(f"Erro no cliente {client_id}: {e}")
+            print(f"Erro ao processar a mensagem do cliente {client_id}: {e}")
         finally:
             writer.close()
             await writer.wait_closed()

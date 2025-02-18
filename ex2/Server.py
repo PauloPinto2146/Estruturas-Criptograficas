@@ -1,6 +1,6 @@
 import asyncio
 from crypto_utils import (
-    generate_x25519_keypair, generate_ed25519_keypair, ign,
+    generate_x25519_keypair, generate_ed25519_keypair, derive_shared_key,
     sign_message, verify_signature, decrypt_with_aead, x25519, ed25519, serialization
 )
 
